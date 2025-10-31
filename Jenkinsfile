@@ -1,15 +1,10 @@
 pipeline {
     agent any
 
-    // Option 1: SCM Polling (commented out)
     triggers {
-        pollSCM('H/5 * * * *')  // Polls every 5 minutes
+        // SCM polling every 5 minutes
+        pollSCM('H/5 * * * *')
     }
-
-    // Option 2: Cron Schedule (active)
-    // triggers {
-    //     cron('H 2 * * 1-5')  // Runs at 2 AM Monday-Friday
-    // }
 
     stages {
         stage('Checkout') {
@@ -21,7 +16,8 @@ pipeline {
         stage('Check Changes') {
             steps {
                 script {
-                    def changes = sh(script: 'git diff HEAD^ HEAD --name-only', returnStdout: true).trim()
+                    // Windows uses 'bat' instead of 'sh'
+                    def changes = bat(script: 'git diff HEAD^ HEAD --name-only', returnStdout: true).trim()
                     echo "Changed files: ${changes}"
                 }
             }
@@ -32,7 +28,9 @@ pipeline {
                 script {
                     if (fileExists('index.html')) {
                         echo "HTML file exists - validating..."
-                        // You can add HTML validation here
+                        // Optional: Add validation steps here
+                    } else {
+                        echo "No HTML file found, skipping validation."
                     }
                 }
             }
@@ -41,13 +39,14 @@ pipeline {
         stage('Test') {
             steps {
                 script {
-                    // Check if index.html exists and contains required elements
                     if (fileExists('index.html')) {
                         def htmlContent = readFile('index.html')
                         if (!htmlContent.contains('Zohaib Khan')) {
                             error 'Required content not found in index.html'
                         }
                         echo "Content validation passed"
+                    } else {
+                        echo "No HTML file found, skipping test."
                     }
                 }
             }
@@ -56,20 +55,19 @@ pipeline {
         stage('Deploy') {
             steps {
                 echo "Deploying changes..."
-                // Add deployment steps here
+                // Add your deployment steps here
             }
         }
     }
 
     post {
         success {
-            echo "Pipeline executed successfully!"
+            echo "✅ Pipeline executed successfully!"
         }
         failure {
-            echo "Pipeline failed! Check the logs for details."
+            echo "❌ Pipeline failed! Check the logs for details."
         }
         always {
-            // Clean workspace after build
             cleanWs()
         }
     }

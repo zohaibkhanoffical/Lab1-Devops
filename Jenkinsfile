@@ -2,8 +2,7 @@ pipeline {
     agent any
 
     triggers {
-        // SCM polling every 5 minutes
-        pollSCM('H/5 * * * *')
+        pollSCM('H/5 * * * *') // Poll every 5 minutes
     }
 
     stages {
@@ -16,9 +15,14 @@ pipeline {
         stage('Check Changes') {
             steps {
                 script {
-                    // Windows uses 'bat' instead of 'sh'
-                    def changes = bat(script: 'git diff HEAD^ HEAD --name-only', returnStdout: true).trim()
-                    echo "Changed files: ${changes}"
+                    // Check if system is Windows or Linux
+                    if (isUnix()) {
+                        def changes = sh(script: 'git diff HEAD^ HEAD --name-only', returnStdout: true).trim()
+                        echo "Changed files (Linux): ${changes}"
+                    } else {
+                        def changes = bat(script: 'git diff HEAD^ HEAD --name-only', returnStdout: true).trim()
+                        echo "Changed files (Windows): ${changes}"
+                    }
                 }
             }
         }
@@ -28,7 +32,6 @@ pipeline {
                 script {
                     if (fileExists('index.html')) {
                         echo "HTML file exists - validating..."
-                        // Optional: Add validation steps here
                     } else {
                         echo "No HTML file found, skipping validation."
                     }
@@ -44,7 +47,7 @@ pipeline {
                         if (!htmlContent.contains('Zohaib Khan')) {
                             error 'Required content not found in index.html'
                         }
-                        echo "Content validation passed"
+                        echo "Content validation passed ✅"
                     } else {
                         echo "No HTML file found, skipping test."
                     }
@@ -55,7 +58,7 @@ pipeline {
         stage('Deploy') {
             steps {
                 echo "Deploying changes..."
-                // Add your deployment steps here
+                // Add deploy logic here
             }
         }
     }
@@ -65,7 +68,7 @@ pipeline {
             echo "✅ Pipeline executed successfully!"
         }
         failure {
-            echo "❌ Pipeline failed! Check the logs for details."
+            echo "❌ Pipeline failed! Check logs for details."
         }
         always {
             cleanWs()

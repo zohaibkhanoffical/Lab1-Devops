@@ -1,10 +1,15 @@
 pipeline {
     agent any
 
+    // Option 1: SCM Polling (commented out)
     triggers {
-        // Poll SCM every 5 minutes
-        pollSCM('H/5 * * * *')
+        pollSCM('H/5 * * * *')  // Polls every 5 minutes
     }
+
+    // Option 2: Cron Schedule (active)
+    // triggers {
+    //     cron('H 2 * * 1-5')  // Runs at 2 AM Monday-Friday
+    // }
 
     stages {
         stage('Checkout') {

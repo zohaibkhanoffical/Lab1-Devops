@@ -1,4 +1,4 @@
 Hello, this is my first file in the Git repository!
-This line was modified in feature/alpha branch.
+This line was modified in both branches and resolved.
 Adding some more text to make changes later.
 Adding a new line for our second commit!

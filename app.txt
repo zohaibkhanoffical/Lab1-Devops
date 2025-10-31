@@ -1,3 +1,4 @@
 Hello, this is my first file in the Git repository!
-This is line 2 of the content.
+This line was modified in feature/alpha branch.
 Adding some more text to make changes later.
+Adding a new line for our second commit!
